@@ -8,6 +8,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -20,6 +21,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 
 @Component
+@Slf4j
 @RequiredArgsConstructor
 public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
@@ -50,7 +52,11 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         String refreshToken = jwtService.generateRefreshToken(user, UUID.randomUUID().toString());
 
         // Seed demo data for this user if they have none yet
-        userDataSeeder.seedForUser(user);
+        try {
+            userDataSeeder.seedForUser(user);
+        } catch (Exception e) {
+            log.warn("Demo seeding failed for OAuth2 user {}: {}", user.getEmail(), e.getMessage());
+        }
         
         // Redirect to the frontend with the tokens
         String targetUrl = frontendUrl + "/login?token=" + accessToken + "&refreshToken=" + refreshToken;

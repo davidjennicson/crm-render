@@ -11,6 +11,7 @@ import com.hokma.auth.demo.auth.service.UserService;
 import com.hokma.auth.demo.shared.exception.ResourceNotFoundException;
 import com.hokma.auth.demo.shared.UserDataSeeder;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 import java.util.UUID;
 
 @Service
+@Slf4j
 @AllArgsConstructor
 public class AuthServiceImpl implements AuthService {
     private final UserService userService;
@@ -37,7 +39,11 @@ public class AuthServiceImpl implements AuthService {
         userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
         UserDto created = userService.createUser(userDto);
         // Seed demo data for the newly registered user
-        userRepository.findByEmail(created.getEmail()).ifPresent(userDataSeeder::seedForUser);
+        try {
+            userRepository.findByEmail(created.getEmail()).ifPresent(userDataSeeder::seedForUser);
+        } catch (Exception e) {
+            log.warn("Demo seeding failed after register for {}: {}", created.getEmail(), e.getMessage());
+        }
         return created;
     }
 
@@ -53,8 +59,12 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByEmail(loginDto.getEmail())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        // Seed demo data for this user if they have none yet
-        userDataSeeder.seedForUser(user);
+        // Seed demo data — wrapped so any failure doesn't break login
+        try {
+            userDataSeeder.seedForUser(user);
+        } catch (Exception e) {
+            log.warn("Demo seeding failed for {}: {}", user.getEmail(), e.getMessage());
+        }
 
         String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user, UUID.randomUUID().toString());
