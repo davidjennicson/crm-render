@@ -33,4 +33,5 @@ COPY --from=backend-build /app/demo/target/*.jar app.jar
 
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Use shell form so env vars expand at runtime
+ENTRYPOINT java -Dspring.profiles.active=${SPRING_PROFILES_ACTIVE:-prod} -jar app.jar
