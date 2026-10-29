@@ -54,16 +54,10 @@ public class SecurityConfig {
                             "/swagger-ui.html",
                             "/swagger-resources/**",
                             "/webjars/**",
-                            "/error",
-                            "/",
-                            "/index.html",
-                            "/assets/**",
-                            "/favicon.ico",
-                            "/static/**",
-                            "/manifest.json",
-                            "/robots.txt"
+                            "/error"
                     ).permitAll()
-                    .anyRequest().authenticated()
+                    .requestMatchers("/api/**").authenticated()
+                    .anyRequest().permitAll()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
             .oauth2Login(oauth2 -> oauth2.successHandler(oAuth2LoginSuccessHandler));
