@@ -1,0 +1,1 @@
+{"message":"Handler dispatch failed: java.lang.NoSuchMethodError: 'void org.springframework.web.method.ControllerAdviceBean.<init>(java.lang.Object)'","status":"INTERNAL_SERVER_ERROR","statusCode":500}
