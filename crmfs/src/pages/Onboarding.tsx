@@ -284,7 +284,7 @@ export default function Onboarding() {
 
         <p className="text-center text-muted-foreground text-[12px] mt-8 flex items-center justify-center gap-1.5 font-medium">
           <CheckCircle2 className="w-3.5 h-3.5 text-success" />
-          Enterprise-grade security by Antigravity CRM
+          Enterprise-grade security by Nexus CRM
         </p>
       </div>
     </div>

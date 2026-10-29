@@ -63,7 +63,7 @@ export default function Signup() {
       })
 
       login(authResponse.accessToken, registeredUser)
-      toast.success("Account created! Welcome to Antigravity CRM.")
+      toast.success("Account created! Welcome to Nexus CRM.")
       navigate("/")
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Registration failed. Please try again."
