@@ -9,6 +9,7 @@ import com.hokma.auth.demo.auth.security.JwtService;
 import com.hokma.auth.demo.auth.service.AuthService;
 import com.hokma.auth.demo.auth.service.UserService;
 import com.hokma.auth.demo.shared.exception.ResourceNotFoundException;
+import com.hokma.auth.demo.shared.UserDataSeeder;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,6 +27,7 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final UserRepository userRepository;
+    private final UserDataSeeder userDataSeeder;
 
     @Override
     public UserDto registerUser(UserDto userDto) {
@@ -33,7 +35,10 @@ public class AuthServiceImpl implements AuthService {
             throw new IllegalArgumentException("Password cannot be null during registration");
         }
         userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
-        return userService.createUser(userDto);
+        UserDto created = userService.createUser(userDto);
+        // Seed demo data for the newly registered user
+        userRepository.findByEmail(created.getEmail()).ifPresent(userDataSeeder::seedForUser);
+        return created;
     }
 
     @Override
@@ -47,6 +52,9 @@ public class AuthServiceImpl implements AuthService {
 
         User user = userRepository.findByEmail(loginDto.getEmail())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        // Seed demo data for this user if they have none yet
+        userDataSeeder.seedForUser(user);
 
         String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user, UUID.randomUUID().toString());

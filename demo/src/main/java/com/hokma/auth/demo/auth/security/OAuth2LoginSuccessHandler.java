@@ -3,6 +3,7 @@ package com.hokma.auth.demo.auth.security;
 import com.hokma.auth.demo.auth.entity.Provider;
 import com.hokma.auth.demo.auth.entity.User;
 import com.hokma.auth.demo.auth.repository.UserRepository;
+import com.hokma.auth.demo.shared.UserDataSeeder;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -24,6 +25,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
     private final UserRepository userRepository;
     private final JwtService jwtService;
+    private final UserDataSeeder userDataSeeder;
     
     @Value("${frontend.url:http://localhost:5173}")
     private String frontendUrl;
@@ -46,6 +48,9 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
         String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user, UUID.randomUUID().toString());
+
+        // Seed demo data for this user if they have none yet
+        userDataSeeder.seedForUser(user);
         
         // Redirect to the frontend with the tokens
         String targetUrl = frontendUrl + "/login?token=" + accessToken + "&refreshToken=" + refreshToken;
