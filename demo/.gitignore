@@ -36,3 +36,6 @@ build/
 .env
 application-dev.yaml
 application-qa.yaml
+
+### Frontend build output (built by Docker, not committed) ###
+src/main/resources/static/
